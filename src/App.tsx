@@ -97,7 +97,7 @@ const faqs = [
   },
   {
     q: "Which payment methods do you accept?",
-    a: "We accept Visa, Bancontact and PayPal. You'll receive a secure payment link after placing your order.",
+    a: "We accept Visa or Bancontact. You'll receive a secure payment link after placing your order.",
   },
   {
     q: "Is there a warranty?",
@@ -124,26 +124,26 @@ export default function App() {
   const fmt = (n: number) => `€${n.toFixed(2).replace(".", ",")}`;
 
   const orderMail = (subject: string, body: string) =>
-    `mailto:orders@custompscontrollers.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    `mailto:custom.pscontrollers@hotmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
   const productMail = (p: Product) =>
     orderMail(
       `Order: ${p.name} Controller`,
-      `Hi,\n\nI would like to order the "${p.name}" custom PS5 controller (${fmt(p.price)}).\n\nName:\nAddress:\nPreferred payment method (Visa / Bancontact / PayPal):\n\nThanks!`
+      `Hi,\n\nI would like to order the "${p.name}" custom PS5 controller (${fmt(p.price)}).\n\nName:\nAddress:\nPreferred payment method (Visa / Bancontact):\n\nThanks!`
     );
 
   const paddleMail = (p: Paddle) => {
     const shipping = p.price >= FREE_SHIPPING_FROM ? 0 : SHIPPING_COST;
     return orderMail(
       `Order: ${p.name} Back Paddle`,
-      `Hi,\n\nI would like to order the "${p.name}" back paddle kit.\n\nBack paddle: ${fmt(p.price)}\nShipping: ${shipping === 0 ? "FREE" : fmt(shipping)}\nTotal: ${fmt(p.price + shipping)}\n\nName:\nAddress:\nPreferred payment method (Visa / Bancontact / PayPal):\n\nThanks!`
+      `Hi,\n\nI would like to order the "${p.name}" back paddle kit.\n\nBack paddle: ${fmt(p.price)}\nShipping: ${shipping === 0 ? "FREE" : fmt(shipping)}\nTotal: ${fmt(p.price + shipping)}\n\nName:\nAddress:\nPreferred payment method (Visa / Bancontact):\n\nThanks!`
     );
   };
 
   const configMail = () =>
     orderMail(
       `Order: ${cfgController.name} + ${cfgPaddle ? cfgPaddle.name : "no back paddle"}`,
-      `Hi,\n\nI would like to order:\n\nController: ${cfgController.name} — ${fmt(cfgController.price)}\nBack paddle: ${cfgPaddle ? `${cfgPaddle.name} — ${fmt(cfgPaddle.price)}` : "None"}\n\nSubtotal: ${fmt(cfg.subtotal)}\nShipping: ${cfg.shipping === 0 ? "FREE" : fmt(cfg.shipping)}\nTotal: ${fmt(cfg.total)}\n\nName:\nAddress:\nPreferred payment method (Visa / Bancontact / PayPal):\n\nThanks!`
+      `Hi,\n\nI would like to order:\n\nController: ${cfgController.name} — ${fmt(cfgController.price)}\nBack paddle: ${cfgPaddle ? `${cfgPaddle.name} — ${fmt(cfgPaddle.price)}` : "None"}\n\nSubtotal: ${fmt(cfg.subtotal)}\nShipping: ${cfg.shipping === 0 ? "FREE" : fmt(cfg.shipping)}\nTotal: ${fmt(cfg.total)}\n\nName:\nAddress:\nPreferred payment method (Visa / Bancontact):\n\nThanks!`
     );
 
   return (
@@ -431,7 +431,7 @@ export default function App() {
                 Order This Build
               </a>
               <p className="text-center text-xs text-white/40 mt-3">
-                Pay securely via Visa, Bancontact or PayPal after confirmation.
+                Pay securely via Visa or Bancontact after confirmation.
               </p>
             </div>
           </div>
@@ -477,7 +477,7 @@ export default function App() {
           <h2 className="text-2xl font-bold mb-3">Secure Payment</h2>
           <p className="text-white/60 mb-6">Pay the way you like — safe and simple.</p>
           <div className="flex justify-center gap-4 flex-wrap">
-            {["Visa", "Bancontact", "PayPal"].map((m) => (
+            {["Visa", "Bancontact"].map((m) => (
               <span key={m} className="bg-white/10 border border-white/20 px-6 py-2.5 rounded-full font-semibold text-sm">
                 {m}
               </span>
@@ -528,7 +528,7 @@ export default function App() {
           Custom<span className="text-violet-500">PS</span>Controllers
         </div>
         <p className="mb-2 flex items-center justify-center gap-1">
-          <Mail className="w-4 h-4" /> orders@custompscontrollers.com
+          <Mail className="w-4 h-4" /> custom.pscontrollers@hotmail.com
         </p>
         <p>© {new Date().getFullYear()} CustomPSControllers. Not affiliated with Sony Interactive Entertainment.</p>
       </footer>
@@ -547,7 +547,7 @@ export default function App() {
             <div className="space-y-2 text-sm text-white/70 mb-6">
               <p className="flex items-center gap-2"><Check className="w-4 h-4 text-green-400" /> Custom shell, hand-built</p>
               <p className="flex items-center gap-2"><Check className="w-4 h-4 text-green-400" /> 2-month warranty</p>
-              <p className="flex items-center gap-2"><Check className="w-4 h-4 text-green-400" /> Pay via Visa, Bancontact or PayPal</p>
+              <p className="flex items-center gap-2"><Check className="w-4 h-4 text-green-400" /> Pay via Visa or Bancontact</p>
             </div>
             <div className="flex items-center justify-between mb-2">
               <span className="text-white/50">Controller</span>
@@ -580,7 +580,7 @@ export default function App() {
             <div className="space-y-2 text-sm text-white/70 mb-6">
               <p className="flex items-center gap-2"><Check className="w-4 h-4 text-green-400" /> 4 remappable back buttons kit</p>
               <p className="flex items-center gap-2"><Check className="w-4 h-4 text-green-400" /> 2-month warranty</p>
-              <p className="flex items-center gap-2"><Check className="w-4 h-4 text-green-400" /> Pay via Visa, Bancontact or PayPal</p>
+              <p className="flex items-center gap-2"><Check className="w-4 h-4 text-green-400" /> Pay via Visa or Bancontact</p>
             </div>
             <div className="space-y-1.5 text-sm mb-6">
               <div className="flex justify-between"><span className="text-white/50">Back paddle</span><span className="font-bold">{fmt(orderPaddle.price)}</span></div>
