@@ -5,18 +5,19 @@ import {
   varchar,
   text,
   timestamp,
-  // bigint,
+  int,
 } from "drizzle-orm/mysql-core";
 
-// TODO: Add your tables here. See docs/Database.md for schema examples and patterns.
-//
-// Example:
-// export const posts = mysqlTable("posts", {
-//   id: serial("id").primaryKey(),
-//   title: varchar("title", { length: 255 }).notNull(),
-//   content: text("content"),
-//   createdAt: timestamp("created_at").notNull().defaultNow(),
-// });
-//
-// Note: FK columns referencing a serial() PK must use:
-//   bigint("columnName", { mode: "number", unsigned: true }).notNull()
+export const orders = mysqlTable("orders", {
+  id: serial("id").primaryKey(),
+  customerName: varchar("customer_name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull(),
+  address: text("address").notNull(),
+  paymentMethod: mysqlEnum("payment_method", ["visa", "bancontact"]).notNull(),
+  items: text("items").notNull(), // human-readable list of ordered items
+  subtotal: int("subtotal").notNull(), // cents
+  shipping: int("shipping").notNull(), // cents
+  total: int("total").notNull(), // cents
+  status: mysqlEnum("status", ["new", "paid", "shipped", "done"]).notNull().default("new"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});

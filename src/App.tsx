@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Routes, Route } from "react-router";
 import {
   Gamepad2,
   Zap,
@@ -8,17 +9,22 @@ import {
   ChevronDown,
   Check,
   Mail,
-  CreditCard,
   Menu,
   X,
   Wrench,
+  Landmark,
+  Loader2,
+  Package,
+  ClipboardList,
 } from "lucide-react";
+import { trpc } from "@/providers/trpc";
 
 /* ============================================================
-   PRICES — easy to edit
+   SETTINGS — easy to edit
    ============================================================ */
 const SHIPPING_COST = 4.95; // shipping fee in EUR
 const FREE_SHIPPING_FROM = 90; // free shipping from this subtotal
+const BANK_ACCOUNT = "BE40 9735 0579 9763"; // payment account
 
 type Product = {
   id: string;
@@ -40,7 +46,7 @@ type Paddle = {
 };
 
 /* Controllers (base models for the configurator)
-   Single color = €70 · Two or more colors = €90 */
+   Single color = €80 · Two or more colors = €100 */
 const products: Product[] = [
   { id: "classic-white", name: "Classic White", price: 80, img: "/images/controllers/classic-white.jpg", color: "from-slate-300 to-slate-500", desc: "The timeless original DualSense look." },
   { id: "midnight-black", name: "Midnight Black", price: 80, img: "/images/controllers/midnight-black.jpg", color: "from-zinc-600 to-black", tag: "Best Seller", desc: "Sleek all-black official finish." },
@@ -62,7 +68,7 @@ const products: Product[] = [
   { id: "spider-man", name: "Spider-Man Edition", price: 100, img: "/images/controllers/spider-man.jpg", color: "from-red-600 to-zinc-900", tag: "Limited", desc: "Black and red web design with spider emblem." },
 ];
 
-/* Back paddles — prices are placeholders, easy to change */
+/* Back paddles */
 const paddles: Paddle[] = [
   { id: "snow-rush", name: "Snow Rush", price: 54, img: "/images/paddles/snow-rush.jpg", color: "from-slate-300 to-slate-500" },
   { id: "chameleon-purple", name: "Chameleon Purple", price: 59, img: "/images/paddles/chameleon-purple.jpg", color: "from-purple-400 to-blue-500", tag: "Popular" },
@@ -96,8 +102,8 @@ const faqs = [
     a: `Shipping is €${SHIPPING_COST.toFixed(2)} and completely free on orders of €${FREE_SHIPPING_FROM} or more. Production takes 3–5 business days, plus 2–4 business days shipping within Belgium and the EU.`,
   },
   {
-    q: "Which payment methods do you accept?",
-    a: "We accept Visa or Bancontact. You'll receive a secure payment link after placing your order.",
+    q: "How do I pay?",
+    a: `After placing your order you receive our payment details. You pay by bank transfer (Visa or Bancontact) to ${BANK_ACCOUNT}. Your order goes into production as soon as payment arrives.`,
   },
   {
     q: "Is there a warranty?",
@@ -105,11 +111,177 @@ const faqs = [
   },
 ];
 
-export default function App() {
+/* ---------- helpers ---------- */
+const fmt = (n: number) => `€${n.toFixed(2).replace(".", ",")}`;
+const shippingFor = (subtotal: number) =>
+  subtotal >= FREE_SHIPPING_FROM ? 0 : SHIPPING_COST;
+
+type OrderDraft = {
+  title: string;
+  img?: string;
+  lines: { label: string; amount: number | null }[];
+  subtotal: number;
+  shipping: number;
+  total: number;
+};
+
+/* ---------- Order modal with real form ---------- */
+function OrderModal({ order, onClose }: { order: OrderDraft; onClose: () => void }) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [address, setAddress] = useState("");
+  const [payMethod, setPayMethod] = useState<"visa" | "bancontact">("bancontact");
+  const [done, setDone] = useState(false);
+  const [error, setError] = useState("");
+
+  const createOrder = trpc.orders.create.useMutation({
+    onSuccess: () => setDone(true),
+    onError: () => setError("Something went wrong. Please try again."),
+  });
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    const items = order.lines
+      .filter((l) => l.amount !== null)
+      .map((l) => `${l.label} — ${fmt(l.amount!)}`)
+      .join("\n");
+    createOrder.mutate({
+      customerName: name,
+      email,
+      address,
+      paymentMethod: payMethod,
+      items: `${order.title}\n${items}`,
+      subtotal: Math.round(order.subtotal * 100),
+      shipping: Math.round(order.shipping * 100),
+      total: Math.round(order.total * 100),
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto" onClick={onClose}>
+      <div className="bg-[#14141c] border border-white/10 rounded-2xl max-w-md w-full p-6 my-8" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-start justify-between mb-4">
+          <h3 className="text-xl font-bold">{done ? "Order Placed!" : order.title}</h3>
+          <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-full">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {done ? (
+          <div>
+            <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 mb-5 text-center">
+              <Check className="w-8 h-8 text-green-400 mx-auto mb-2" />
+              <p className="text-green-300 font-semibold">Thank you, {name.split(" ")[0]}!</p>
+              <p className="text-white/60 text-sm mt-1">Your order has been received.</p>
+            </div>
+            <div className="bg-white/5 border border-white/10 rounded-xl p-5 mb-5">
+              <p className="flex items-center gap-2 font-bold mb-3">
+                <Landmark className="w-5 h-5 text-violet-400" /> Payment details
+              </p>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between"><span className="text-white/50">Account</span><span className="font-mono font-bold">{BANK_ACCOUNT}</span></div>
+                <div className="flex justify-between"><span className="text-white/50">Amount</span><span className="font-bold">{fmt(order.total)}</span></div>
+                <div className="flex justify-between"><span className="text-white/50">Reference</span><span className="font-semibold">Order + {name}</span></div>
+              </div>
+              <p className="text-xs text-white/40 mt-3">
+                Pay via {payMethod === "visa" ? "Visa" : "Bancontact"} bank transfer. Your order goes into production as soon as payment arrives.
+              </p>
+            </div>
+            <button onClick={onClose} className="w-full bg-violet-600 hover:bg-violet-500 py-3.5 rounded-full font-bold transition">
+              Close
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={submit}>
+            {order.img && (
+              <img src={order.img} alt="" className="w-full aspect-square object-cover rounded-xl mb-4" />
+            )}
+            <div className="space-y-1.5 text-sm mb-4">
+              {order.lines.map((l) => (
+                <div key={l.label} className="flex justify-between">
+                  <span className="text-white/60">{l.label}</span>
+                  <span>{l.amount === null ? "—" : fmt(l.amount)}</span>
+                </div>
+              ))}
+              <div className="flex justify-between border-t border-white/10 pt-2">
+                <span className="text-white/60">Shipping</span>
+                <span className={order.shipping === 0 ? "text-green-400 font-semibold" : ""}>
+                  {order.shipping === 0 ? "FREE" : fmt(order.shipping)}
+                </span>
+              </div>
+              <div className="flex justify-between text-lg font-extrabold">
+                <span>Total</span>
+                <span>{fmt(order.total)}</span>
+              </div>
+            </div>
+
+            <div className="space-y-3 mb-4">
+              <input
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Full name"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm placeholder-white/30 focus:border-violet-500 focus:outline-none"
+              />
+              <input
+                required
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email address"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm placeholder-white/30 focus:border-violet-500 focus:outline-none"
+              />
+              <textarea
+                required
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="Delivery address (street, number, city, postal code)"
+                rows={2}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm placeholder-white/30 focus:border-violet-500 focus:outline-none resize-none"
+              />
+              <div className="grid grid-cols-2 gap-3">
+                {(["bancontact", "visa"] as const).map((m) => (
+                  <button
+                    type="button"
+                    key={m}
+                    onClick={() => setPayMethod(m)}
+                    className={`py-3 rounded-xl border font-semibold text-sm capitalize transition ${
+                      payMethod === m
+                        ? "border-violet-500 bg-violet-500/10"
+                        : "border-white/10 bg-white/5 hover:border-white/30"
+                    }`}
+                  >
+                    {m === "visa" ? "Visa" : "Bancontact"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {error && <p className="text-red-400 text-sm mb-3">{error}</p>}
+            <button
+              type="submit"
+              disabled={createOrder.isPending}
+              className="w-full bg-violet-600 hover:bg-violet-500 py-3.5 rounded-full font-bold transition disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {createOrder.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+              Place Order — {fmt(order.total)}
+            </button>
+            <p className="text-center text-xs text-white/40 mt-3">
+              You'll receive our payment details after ordering. Pay by bank transfer (Visa / Bancontact).
+            </p>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Shop page ---------- */
+function Shop() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [orderProduct, setOrderProduct] = useState<Product | null>(null);
-  const [orderPaddle, setOrderPaddle] = useState<Paddle | null>(null);
+  const [order, setOrder] = useState<OrderDraft | null>(null);
 
   /* Configurator state */
   const [cfgController, setCfgController] = useState<Product>(products[0]);
@@ -117,34 +289,41 @@ export default function App() {
 
   const cfg = useMemo(() => {
     const subtotal = cfgController.price + (cfgPaddle?.price ?? 0);
-    const shipping = subtotal >= FREE_SHIPPING_FROM ? 0 : SHIPPING_COST;
+    const shipping = shippingFor(subtotal);
     return { subtotal, shipping, total: subtotal + shipping };
   }, [cfgController, cfgPaddle]);
 
-  const fmt = (n: number) => `€${n.toFixed(2).replace(".", ",")}`;
+  const orderController = (p: Product) =>
+    setOrder({
+      title: `Order: ${p.name}`,
+      img: p.img,
+      lines: [{ label: `${p.name} controller`, amount: p.price }],
+      subtotal: p.price,
+      shipping: shippingFor(p.price),
+      total: p.price + shippingFor(p.price),
+    });
 
-  const orderMail = (subject: string, body: string) =>
-    `mailto:custom.pscontrollers@hotmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  const orderPaddle = (p: Paddle) =>
+    setOrder({
+      title: `Order: ${p.name} Back Paddle`,
+      img: p.img,
+      lines: [{ label: `${p.name} back paddle kit`, amount: p.price }],
+      subtotal: p.price,
+      shipping: shippingFor(p.price),
+      total: p.price + shippingFor(p.price),
+    });
 
-  const productMail = (p: Product) =>
-    orderMail(
-      `Order: ${p.name} Controller`,
-      `Hi,\n\nI would like to order the "${p.name}" custom PS5 controller (${fmt(p.price)}).\n\nName:\nAddress:\nPreferred payment method (Visa / Bancontact):\n\nThanks!`
-    );
-
-  const paddleMail = (p: Paddle) => {
-    const shipping = p.price >= FREE_SHIPPING_FROM ? 0 : SHIPPING_COST;
-    return orderMail(
-      `Order: ${p.name} Back Paddle`,
-      `Hi,\n\nI would like to order the "${p.name}" back paddle kit.\n\nBack paddle: ${fmt(p.price)}\nShipping: ${shipping === 0 ? "FREE" : fmt(shipping)}\nTotal: ${fmt(p.price + shipping)}\n\nName:\nAddress:\nPreferred payment method (Visa / Bancontact):\n\nThanks!`
-    );
-  };
-
-  const configMail = () =>
-    orderMail(
-      `Order: ${cfgController.name} + ${cfgPaddle ? cfgPaddle.name : "no back paddle"}`,
-      `Hi,\n\nI would like to order:\n\nController: ${cfgController.name} — ${fmt(cfgController.price)}\nBack paddle: ${cfgPaddle ? `${cfgPaddle.name} — ${fmt(cfgPaddle.price)}` : "None"}\n\nSubtotal: ${fmt(cfg.subtotal)}\nShipping: ${cfg.shipping === 0 ? "FREE" : fmt(cfg.shipping)}\nTotal: ${fmt(cfg.total)}\n\nName:\nAddress:\nPreferred payment method (Visa / Bancontact):\n\nThanks!`
-    );
+  const orderBuild = () =>
+    setOrder({
+      title: "Order: Custom Build",
+      lines: [
+        { label: `${cfgController.name} controller`, amount: cfgController.price },
+        { label: cfgPaddle ? `${cfgPaddle.name} back paddle` : "No backpaddle", amount: cfgPaddle?.price ?? null },
+      ],
+      subtotal: cfg.subtotal,
+      shipping: cfg.shipping,
+      total: cfg.total,
+    });
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white font-sans">
@@ -257,7 +436,7 @@ export default function App() {
                   <div className="flex items-center justify-between">
                     <span className="text-2xl font-extrabold">€{p.price}</span>
                     <button
-                      onClick={() => setOrderProduct(p)}
+                      onClick={() => orderController(p)}
                       className="bg-violet-600 hover:bg-violet-500 px-5 py-2.5 rounded-full text-sm font-bold transition"
                     >
                       Order
@@ -301,7 +480,7 @@ export default function App() {
                   <div className="flex items-center justify-between">
                     <span className="text-xl font-extrabold">€{p.price}</span>
                     <button
-                      onClick={() => setOrderPaddle(p)}
+                      onClick={() => orderPaddle(p)}
                       className="bg-violet-600 hover:bg-violet-500 px-4 py-2 rounded-full text-sm font-bold transition"
                     >
                       Order
@@ -424,14 +603,14 @@ export default function App() {
                   <span>{fmt(cfg.total)}</span>
                 </div>
               </div>
-              <a
-                href={configMail()}
+              <button
+                onClick={orderBuild}
                 className="mt-6 block w-full text-center bg-violet-600 hover:bg-violet-500 py-3.5 rounded-full font-bold transition"
               >
                 Order This Build
-              </a>
+              </button>
               <p className="text-center text-xs text-white/40 mt-3">
-                Pay securely via Visa or Bancontact after confirmation.
+                Pay by bank transfer (Visa / Bancontact) after ordering.
               </p>
             </div>
           </div>
@@ -473,9 +652,15 @@ export default function App() {
       {/* Payment banner */}
       <section className="py-14 px-4 bg-gradient-to-r from-violet-900/40 to-fuchsia-900/40 border-y border-white/10">
         <div className="max-w-4xl mx-auto text-center">
-          <CreditCard className="w-10 h-10 mx-auto mb-4 text-violet-300" />
-          <h2 className="text-2xl font-bold mb-3">Secure Payment</h2>
-          <p className="text-white/60 mb-6">Pay the way you like — safe and simple.</p>
+          <Landmark className="w-10 h-10 mx-auto mb-4 text-violet-300" />
+          <h2 className="text-2xl font-bold mb-3">Secure Payment by Bank Transfer</h2>
+          <p className="text-white/60 mb-6">
+            After your order you receive our payment details — pay easily with Visa or Bancontact to:
+          </p>
+          <div className="inline-block bg-white/10 border border-white/20 px-8 py-4 rounded-2xl mb-6">
+            <p className="text-xs text-white/50 uppercase tracking-widest mb-1">Account number</p>
+            <p className="font-mono font-extrabold text-xl tracking-wider">{BANK_ACCOUNT}</p>
+          </div>
           <div className="flex justify-center gap-4 flex-wrap">
             {["Visa", "Bancontact"].map((m) => (
               <span key={m} className="bg-white/10 border border-white/20 px-6 py-2.5 rounded-full font-semibold text-sm">
@@ -533,77 +718,113 @@ export default function App() {
         <p>© {new Date().getFullYear()} CustomPSControllers. Not affiliated with Sony Interactive Entertainment.</p>
       </footer>
 
-      {/* Controller order modal */}
-      {orderProduct && (
-        <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setOrderProduct(null)}>
-          <div className="bg-[#14141c] border border-white/10 rounded-2xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-start justify-between mb-4">
-              <h3 className="text-xl font-bold">Order: {orderProduct.name}</h3>
-              <button onClick={() => setOrderProduct(null)} className="p-1 hover:bg-white/10 rounded-full">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <img src={orderProduct.img} alt={orderProduct.name} className="w-full aspect-square object-cover rounded-xl mb-4" />
-            <div className="space-y-2 text-sm text-white/70 mb-6">
-              <p className="flex items-center gap-2"><Check className="w-4 h-4 text-green-400" /> Custom shell, hand-built</p>
-              <p className="flex items-center gap-2"><Check className="w-4 h-4 text-green-400" /> 2-month warranty</p>
-              <p className="flex items-center gap-2"><Check className="w-4 h-4 text-green-400" /> Pay via Visa or Bancontact</p>
-            </div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-white/50">Controller</span>
-              <span className="text-2xl font-extrabold">{fmt(orderProduct.price)}</span>
-            </div>
-            <p className="text-right text-xs text-white/40 mb-6">
-              + {orderProduct.price >= FREE_SHIPPING_FROM ? "FREE shipping" : `${fmt(SHIPPING_COST)} shipping`}
-            </p>
-            <a
-              href={productMail(orderProduct)}
-              className="block w-full text-center bg-violet-600 hover:bg-violet-500 py-3.5 rounded-full font-bold transition"
-            >
-              Place Order via Email
-            </a>
-          </div>
-        </div>
-      )}
-
-      {/* Paddle order modal */}
-      {orderPaddle && (
-        <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setOrderPaddle(null)}>
-          <div className="bg-[#14141c] border border-white/10 rounded-2xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-start justify-between mb-4">
-              <h3 className="text-xl font-bold">Order: {orderPaddle.name}</h3>
-              <button onClick={() => setOrderPaddle(null)} className="p-1 hover:bg-white/10 rounded-full">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <img src={orderPaddle.img} alt={orderPaddle.name} className="w-full aspect-square object-cover rounded-xl mb-4" />
-            <div className="space-y-2 text-sm text-white/70 mb-6">
-              <p className="flex items-center gap-2"><Check className="w-4 h-4 text-green-400" /> 4 remappable back buttons kit</p>
-              <p className="flex items-center gap-2"><Check className="w-4 h-4 text-green-400" /> 2-month warranty</p>
-              <p className="flex items-center gap-2"><Check className="w-4 h-4 text-green-400" /> Pay via Visa or Bancontact</p>
-            </div>
-            <div className="space-y-1.5 text-sm mb-6">
-              <div className="flex justify-between"><span className="text-white/50">Back paddle</span><span className="font-bold">{fmt(orderPaddle.price)}</span></div>
-              <div className="flex justify-between">
-                <span className="text-white/50">Shipping</span>
-                <span className={orderPaddle.price >= FREE_SHIPPING_FROM ? "text-green-400 font-semibold" : ""}>
-                  {orderPaddle.price >= FREE_SHIPPING_FROM ? "FREE" : fmt(SHIPPING_COST)}
-                </span>
-              </div>
-              <div className="flex justify-between border-t border-white/10 pt-2 text-lg font-extrabold">
-                <span>Total</span>
-                <span>{fmt(orderPaddle.price + (orderPaddle.price >= FREE_SHIPPING_FROM ? 0 : SHIPPING_COST))}</span>
-              </div>
-            </div>
-            <a
-              href={paddleMail(orderPaddle)}
-              className="block w-full text-center bg-violet-600 hover:bg-violet-500 py-3.5 rounded-full font-bold transition"
-            >
-              Place Order via Email
-            </a>
-          </div>
-        </div>
-      )}
+      {order && <OrderModal order={order} onClose={() => setOrder(null)} />}
     </div>
+  );
+}
+
+/* ---------- Admin page ---------- */
+function Admin() {
+  const [key, setKey] = useState("");
+  const [authed, setAuthed] = useState(false);
+  const [keyInput, setKeyInput] = useState("");
+
+  const ordersQuery = trpc.orders.list.useQuery(
+    { key },
+    { enabled: authed, retry: false }
+  );
+  const utils = trpc.useUtils();
+  const updateStatus = trpc.orders.updateStatus.useMutation({
+    onSuccess: () => utils.orders.list.invalidate(),
+  });
+
+  const login = (e: React.FormEvent) => {
+    e.preventDefault();
+    setKey(keyInput);
+    setAuthed(true);
+  };
+
+  const cents = (c: number) => `€${(c / 100).toFixed(2).replace(".", ",")}`;
+
+  return (
+    <div className="min-h-screen bg-[#0a0a0f] text-white font-sans p-6">
+      <div className="max-w-5xl mx-auto">
+        <div className="flex items-center gap-2 font-bold text-lg mb-8">
+          <ClipboardList className="w-6 h-6 text-violet-500" />
+          Orders Admin
+        </div>
+
+        {!authed ? (
+          <form onSubmit={login} className="max-w-sm mx-auto mt-24 bg-white/5 border border-white/10 rounded-2xl p-8">
+            <h1 className="font-bold text-xl mb-4 text-center">Admin Login</h1>
+            <input
+              type="password"
+              value={keyInput}
+              onChange={(e) => setKeyInput(e.target.value)}
+              placeholder="Password"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm placeholder-white/30 focus:border-violet-500 focus:outline-none mb-4"
+            />
+            <button className="w-full bg-violet-600 hover:bg-violet-500 py-3 rounded-xl font-bold transition">
+              Log In
+            </button>
+          </form>
+        ) : ordersQuery.isLoading ? (
+          <p className="text-center text-white/50 flex items-center justify-center gap-2">
+            <Loader2 className="w-5 h-5 animate-spin" /> Loading orders…
+          </p>
+        ) : ordersQuery.isError ? (
+          <div className="text-center">
+            <p className="text-red-400 mb-4">Wrong password or server error.</p>
+            <button onClick={() => setAuthed(false)} className="bg-white/10 px-6 py-2 rounded-full text-sm">Back</button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <p className="text-white/50 text-sm">{ordersQuery.data?.length ?? 0} order(s)</p>
+            {(ordersQuery.data ?? []).map((o: NonNullable<typeof ordersQuery.data>[number]) => (
+              <div key={o.id} className="bg-white/5 border border-white/10 rounded-2xl p-5">
+                <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
+                  <div>
+                    <p className="font-bold">#{o.id} — {o.customerName}</p>
+                    <p className="text-white/50 text-sm">{o.email}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="font-extrabold text-lg">{cents(o.total)}</span>
+                    <select
+                      value={o.status}
+                      onChange={(e) =>
+                        updateStatus.mutate({ key, id: Number(o.id), status: e.target.value as "new" | "paid" | "shipped" | "done" })
+                      }
+                      className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-sm"
+                    >
+                      <option value="new">New</option>
+                      <option value="paid">Paid</option>
+                      <option value="shipped">Shipped</option>
+                      <option value="done">Done</option>
+                    </select>
+                  </div>
+                </div>
+                <pre className="whitespace-pre-wrap text-sm text-white/70 bg-white/5 rounded-xl p-3 mb-2 font-sans">{o.items}</pre>
+                <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-white/40">
+                  <span className="flex items-center gap-1"><Package className="w-3 h-3" /> {o.address}</span>
+                  <span>Payment: {o.paymentMethod === "visa" ? "Visa" : "Bancontact"}</span>
+                  <span>Shipping: {o.shipping === 0 ? "FREE" : cents(o.shipping)}</span>
+                  <span>{new Date(o.createdAt).toLocaleString()}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Shop />} />
+      <Route path="/admin" element={<Admin />} />
+      <Route path="*" element={<Shop />} />
+    </Routes>
   );
 }
