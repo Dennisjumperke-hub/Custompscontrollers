@@ -39,42 +39,23 @@ type Paddle = {
   tag?: string;
 };
 
-/* Controllers (base models for the configurator) */
+/* Controllers (base models for the configurator) — prices are placeholders, easy to change */
 const products: Product[] = [
-  {
-    id: "crimson",
-    name: "Crimson Strike",
-    price: 129,
-    img: "/images/controller-red.png",
-    color: "from-red-500 to-orange-500",
-    tag: "Best Seller",
-    desc: "Matte black shell with neon red accents.",
-  },
-  {
-    id: "frost",
-    name: "Midnight Frost",
-    price: 129,
-    img: "/images/controller-blue.png",
-    color: "from-blue-500 to-cyan-400",
-    desc: "Midnight blue shell with chrome silver details.",
-  },
-  {
-    id: "royal",
-    name: "Royal Gold",
-    price: 149,
-    img: "/images/controller-gold.png",
-    color: "from-amber-400 to-yellow-600",
-    tag: "Premium",
-    desc: "Pure white shell with gold accents — the luxury edition.",
-  },
-  {
-    id: "venom",
-    name: "Venom Green",
-    price: 129,
-    img: "/images/controller-green.png",
-    color: "from-lime-400 to-emerald-600",
-    desc: "Neon green and black shell for players who want to stand out.",
-  },
+  { id: "classic-white", name: "Classic White", price: 129, img: "/images/controllers/classic-white.jpg", color: "from-slate-300 to-slate-500", desc: "The timeless original DualSense look." },
+  { id: "midnight-black", name: "Midnight Black", price: 129, img: "/images/controllers/midnight-black.jpg", color: "from-zinc-600 to-black", tag: "Best Seller", desc: "Sleek all-black official finish." },
+  { id: "grey-camo", name: "Grey Camo", price: 139, img: "/images/controllers/grey-camo.jpg", color: "from-stone-500 to-stone-800", desc: "Urban camouflage for tactical players." },
+  { id: "chameleon-blue", name: "Chameleon Blue", price: 149, img: "/images/controllers/chameleon-blue.jpg", color: "from-indigo-500 to-blue-700", tag: "Premium", desc: "Metallic blue-purple color-shifting shell." },
+  { id: "pearl-white", name: "Pearl White", price: 149, img: "/images/controllers/pearl-white.jpg", color: "from-slate-200 to-purple-200", tag: "Premium", desc: "Iridescent pearl finish that shifts in the light." },
+  { id: "chameleon-emerald", name: "Chameleon Emerald", price: 149, img: "/images/controllers/chameleon-emerald.jpg", color: "from-emerald-500 to-teal-700", desc: "Metallic green-teal color-shifting shell." },
+  { id: "cobalt-blue", name: "Cobalt Blue", price: 129, img: "/images/controllers/cobalt-blue.jpg", color: "from-blue-600 to-indigo-800", desc: "Deep, rich metallic blue." },
+  { id: "fortnite", name: "Fortnite Edition", price: 159, img: "/images/controllers/fortnite-edition.jpg", color: "from-sky-400 to-blue-600", tag: "Limited", desc: "Official Fortnite limited edition design." },
+  { id: "sky-blue", name: "Sky Blue", price: 129, img: "/images/controllers/sky-blue.jpg", color: "from-sky-400 to-cyan-600", desc: "Fresh and bright light blue." },
+  { id: "tech-white", name: "Tech White Volt", price: 139, img: "/images/controllers/tech-white.jpg", color: "from-lime-300 to-slate-400", desc: "White shell with volt-green tech graphics." },
+  { id: "nova-pink", name: "Nova Pink", price: 129, img: "/images/controllers/nova-pink.jpg", color: "from-pink-500 to-fuchsia-700", desc: "Bold, vibrant pink that stands out." },
+  { id: "galaxy-purple", name: "Galaxy Purple", price: 129, img: "/images/controllers/galaxy-purple.jpg", color: "from-violet-500 to-purple-800", desc: "Rich metallic purple finish." },
+  { id: "sterling-silver", name: "Sterling Silver", price: 139, img: "/images/controllers/sterling-silver.jpg", color: "from-gray-300 to-gray-500", desc: "Clean brushed silver look." },
+  { id: "volcanic-red", name: "Volcanic Red", price: 139, img: "/images/controllers/volcanic-red.jpg", color: "from-red-500 to-red-800", desc: "Glossy red with black accents." },
+  { id: "crimson-red", name: "Crimson Red", price: 129, img: "/images/controllers/crimson-red.jpg", color: "from-rose-500 to-red-800", desc: "Deep metallic crimson." },
 ];
 
 /* Back paddles — prices are placeholders, easy to change */
