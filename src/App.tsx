@@ -64,18 +64,18 @@ const products: Product[] = [
 
 /* Back paddles — prices are placeholders, easy to change */
 const paddles: Paddle[] = [
-  { id: "snow-rush", name: "Snow Rush", price: 39, img: "/images/paddles/snow-rush.jpg", color: "from-slate-300 to-slate-500" },
-  { id: "chameleon-purple", name: "Chameleon Purple", price: 44, img: "/images/paddles/chameleon-purple.jpg", color: "from-purple-400 to-blue-500", tag: "Popular" },
-  { id: "chameleon-green", name: "Chameleon Green", price: 44, img: "/images/paddles/chameleon-green.jpg", color: "from-teal-400 to-purple-500" },
-  { id: "chrome-gold", name: "Chrome Gold", price: 49, img: "/images/paddles/chrome-gold.jpg", color: "from-amber-400 to-yellow-600", tag: "Premium" },
-  { id: "carbon-fiber", name: "Carbon Fiber", price: 39, img: "/images/paddles/carbon-fiber.jpg", color: "from-zinc-500 to-zinc-800" },
-  { id: "arctic-white", name: "Arctic White Grip", price: 39, img: "/images/paddles/arctic-white.jpg", color: "from-slate-200 to-slate-400" },
-  { id: "wave-blue", name: "Wave Blue Grip", price: 39, img: "/images/paddles/wave-blue.jpg", color: "from-blue-500 to-indigo-700" },
-  { id: "crimson-red", name: "Crimson Red Grip", price: 39, img: "/images/paddles/crimson-red.jpg", color: "from-red-500 to-rose-700" },
-  { id: "venom-green", name: "Venom Green Grip", price: 39, img: "/images/paddles/venom-green.jpg", color: "from-lime-400 to-emerald-600" },
-  { id: "dark-wood", name: "Dark Wood", price: 44, img: "/images/paddles/dark-wood.jpg", color: "from-amber-700 to-yellow-900" },
-  { id: "stealth-black", name: "Stealth Black", price: 39, img: "/images/paddles/stealth-black.jpg", color: "from-zinc-600 to-black" },
-  { id: "ruby-red", name: "Ruby Red Metallic", price: 44, img: "/images/paddles/ruby-red.jpg", color: "from-red-600 to-red-900" },
+  { id: "snow-rush", name: "Snow Rush", price: 54, img: "/images/paddles/snow-rush.jpg", color: "from-slate-300 to-slate-500" },
+  { id: "chameleon-purple", name: "Chameleon Purple", price: 59, img: "/images/paddles/chameleon-purple.jpg", color: "from-purple-400 to-blue-500", tag: "Popular" },
+  { id: "chameleon-green", name: "Chameleon Green", price: 59, img: "/images/paddles/chameleon-green.jpg", color: "from-teal-400 to-purple-500" },
+  { id: "chrome-gold", name: "Chrome Gold", price: 64, img: "/images/paddles/chrome-gold.jpg", color: "from-amber-400 to-yellow-600", tag: "Premium" },
+  { id: "carbon-fiber", name: "Carbon Fiber", price: 54, img: "/images/paddles/carbon-fiber.jpg", color: "from-zinc-500 to-zinc-800" },
+  { id: "arctic-white", name: "Arctic White Grip", price: 54, img: "/images/paddles/arctic-white.jpg", color: "from-slate-200 to-slate-400" },
+  { id: "wave-blue", name: "Wave Blue Grip", price: 54, img: "/images/paddles/wave-blue.jpg", color: "from-blue-500 to-indigo-700" },
+  { id: "crimson-red", name: "Crimson Red Grip", price: 54, img: "/images/paddles/crimson-red.jpg", color: "from-red-500 to-rose-700" },
+  { id: "venom-green", name: "Venom Green Grip", price: 54, img: "/images/paddles/venom-green.jpg", color: "from-lime-400 to-emerald-600" },
+  { id: "dark-wood", name: "Dark Wood", price: 59, img: "/images/paddles/dark-wood.jpg", color: "from-amber-700 to-yellow-900" },
+  { id: "stealth-black", name: "Stealth Black", price: 54, img: "/images/paddles/stealth-black.jpg", color: "from-zinc-600 to-black" },
+  { id: "ruby-red", name: "Ruby Red Metallic", price: 59, img: "/images/paddles/ruby-red.jpg", color: "from-red-600 to-red-900" },
 ];
 
 const faqs = [
