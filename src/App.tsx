@@ -57,8 +57,8 @@ const products: Product[] = [
   { id: "sterling-silver", name: "Sterling Silver", price: 70, img: "/images/controllers/sterling-silver.jpg", color: "from-gray-300 to-gray-500", desc: "Clean brushed silver look." },
   { id: "volcanic-red", name: "Volcanic Red", price: 90, img: "/images/controllers/volcanic-red.jpg", color: "from-red-500 to-red-800", desc: "Glossy red with black accents." },
   { id: "crimson-red", name: "Crimson Red", price: 70, img: "/images/controllers/crimson-red.jpg", color: "from-rose-500 to-red-800", desc: "Deep metallic crimson." },
-  { id: "volt-green", name: "Volt Green", price: 70, img: "/images/controllers/volt-green.jpg", color: "from-lime-400 to-green-600", tag: "New", desc: "Electric lime green that pops." },
-  { id: "electric-blue", name: "Electric Blue", price: 70, img: "/images/controllers/electric-blue.jpg", color: "from-cyan-400 to-blue-600", tag: "New", desc: "Bright electric blue with gloss finish." },
+  { id: "volt-green", name: "Volt Green", price: 90, img: "/images/controllers/volt-green.jpg", color: "from-lime-400 to-green-600", tag: "New", desc: "Electric lime green that pops." },
+  { id: "electric-blue", name: "Electric Blue", price: 90, img: "/images/controllers/electric-blue.jpg", color: "from-cyan-400 to-blue-600", tag: "New", desc: "Bright electric blue with gloss finish." },
   { id: "spider-man", name: "Spider-Man Edition", price: 90, img: "/images/controllers/spider-man.jpg", color: "from-red-600 to-zinc-900", tag: "Limited", desc: "Black and red web design with spider emblem." },
 ];
 
