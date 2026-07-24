@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Routes, Route, Link } from "react-router";
 import {
   Gamepad2,
@@ -292,6 +292,21 @@ function Shop() {
   const [paidBanner, setPaidBanner] = useState(
     () => new URLSearchParams(window.location.search).get("payment") === "success"
   );
+
+  // After returning from Stripe, sync the payment status in the background
+  const paidOrderId = useMemo(() => {
+    const v = new URLSearchParams(window.location.search).get("order");
+    return v ? Number(v) : null;
+  }, []);
+  const checkPayment = trpc.orders.checkPayment.useQuery(
+    { orderId: paidOrderId ?? 0 },
+    { enabled: paidOrderId !== null, retry: false }
+  );
+  useEffect(() => {
+    if (checkPayment.data && checkPayment.data.status !== "paid") {
+      setPaidBanner(false);
+    }
+  }, [checkPayment.data]);
 
   /* Configurator state */
   const [cfgController, setCfgController] = useState<Product>(products[0]);

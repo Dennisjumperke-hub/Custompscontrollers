@@ -23,15 +23,15 @@ export async function getOrderById(id: number) {
   return rows[0];
 }
 
-export async function setMolliePaymentId(id: number, molliePaymentId: string) {
-  await getDb().update(orders).set({ molliePaymentId }).where(eq(orders.id, id));
+export async function setStripeSessionId(id: number, stripeSessionId: string) {
+  await getDb().update(orders).set({ stripeSessionId }).where(eq(orders.id, id));
 }
 
-export async function getOrderByMollieId(molliePaymentId: string) {
+export async function getOrderByStripeSession(stripeSessionId: string) {
   const rows = await getDb()
     .select()
     .from(orders)
-    .where(eq(orders.molliePaymentId, molliePaymentId));
+    .where(eq(orders.stripeSessionId, stripeSessionId));
   return rows[0];
 }
 

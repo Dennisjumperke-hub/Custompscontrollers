@@ -5,11 +5,11 @@ import {
   getOrderById,
   listOrders,
   markOrderPaid,
-  setMolliePaymentId,
+  setStripeSessionId,
   updateOrderStatus,
 } from "./queries/orders";
-import { sendOrderNotification } from "./email";
-import { createMolliePayment, getMolliePayment } from "./mollie";
+import { sendOrderNotification, sendPaymentReceived } from "./email";
+import { createCheckoutSession, getCheckoutSession } from "./stripe";
 import { env } from "./lib/env";
 
 const ADMIN_KEY = "Dpm5046656";
@@ -41,32 +41,42 @@ export const ordersRouter = createRouter({
   createPayment: publicQuery
     .input(z.object({ orderId: z.number() }))
     .mutation(async ({ ctx, input }) => {
-      if (!env.mollieApiKey) throw new Error("Payments not configured yet");
+      if (!env.stripeSecretKey) throw new Error("Payments not configured yet");
       const order = await getOrderById(input.orderId);
       if (!order) throw new Error("Order not found");
       const origin = new URL(ctx.req.url).origin;
-      const payment = await createMolliePayment({
+      const session = await createCheckoutSession({
+        orderId: Number(order.id),
         amountCents: order.total,
         description: `CustomPSControllers order #${order.id}`,
-        redirectUrl: `${origin}/?payment=success`,
-        webhookUrl: `${origin}/api/mollie-webhook`,
-        orderId: Number(order.id),
-        method: order.paymentMethod === "visa" ? "creditcard" : "bancontact",
+        origin,
+        customerEmail: order.email,
+        method: order.paymentMethod,
       });
-      await setMolliePaymentId(Number(order.id), payment.id);
-      return { checkoutUrl: payment._links?.checkout?.href ?? null };
+      await setStripeSessionId(Number(order.id), session.id);
+      return { checkoutUrl: session.url };
     }),
 
   checkPayment: publicQuery
     .input(z.object({ orderId: z.number() }))
     .query(async ({ input }) => {
       const order = await getOrderById(input.orderId);
-      if (!order?.molliePaymentId || !env.mollieApiKey) return { status: "unknown" };
-      const payment = await getMolliePayment(order.molliePaymentId);
-      if (payment.status === "paid" && order.status !== "paid") {
+      if (!order?.stripeSessionId || !env.stripeSecretKey) return { status: "unknown" };
+      const session = await getCheckoutSession(order.stripeSessionId);
+      if (session.payment_status === "paid" && order.status !== "paid") {
         await markOrderPaid(input.orderId);
+        try {
+          await sendPaymentReceived({
+            orderId: input.orderId,
+            customerName: order.customerName,
+            email: order.email,
+            total: order.total,
+          });
+        } catch (err) {
+          console.error("Failed to send payment email", err);
+        }
       }
-      return { status: payment.status };
+      return { status: session.payment_status };
     }),
 
   list: publicQuery

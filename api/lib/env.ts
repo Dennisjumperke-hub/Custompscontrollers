@@ -15,4 +15,6 @@ export const env = {
   databaseUrl: required("DATABASE_URL"),
   resendApiKey: process.env.RESEND_API_KEY ?? "",
   mollieApiKey: process.env.MOLLIE_API_KEY ?? "",
+  stripeSecretKey: process.env.STRIPE_SECRET_KEY ?? "",
+  stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET ?? "",
 };
