@@ -19,5 +19,6 @@ export const orders = mysqlTable("orders", {
   shipping: int("shipping").notNull(), // cents
   total: int("total").notNull(), // cents
   status: mysqlEnum("status", ["new", "paid", "shipped", "done"]).notNull().default("new"),
+  molliePaymentId: varchar("mollie_payment_id", { length: 64 }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });

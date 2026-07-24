@@ -14,4 +14,5 @@ export const env = {
   isProduction: process.env.NODE_ENV === "production",
   databaseUrl: required("DATABASE_URL"),
   resendApiKey: process.env.RESEND_API_KEY ?? "",
+  mollieApiKey: process.env.MOLLIE_API_KEY ?? "",
 };

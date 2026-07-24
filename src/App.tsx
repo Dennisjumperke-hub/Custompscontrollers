@@ -111,12 +111,24 @@ function OrderModal({ order, onClose }: { order: OrderDraft; onClose: () => void
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
   const [payMethod, setPayMethod] = useState<"visa" | "bancontact">("bancontact");
-  const [done, setDone] = useState(false);
+  const [orderId, setOrderId] = useState<number | null>(null);
   const [error, setError] = useState("");
 
   const createOrder = trpc.orders.create.useMutation({
-    onSuccess: () => setDone(true),
+    onSuccess: (data) => setOrderId(data.orderId),
     onError: () => setError("Something went wrong. Please try again."),
+  });
+
+  const createPayment = trpc.orders.createPayment.useMutation({
+    onSuccess: (data) => {
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+      } else {
+        setError("Online payment is not available yet — please pay by bank transfer below.");
+      }
+    },
+    onError: () =>
+      setError("Online payment is not available yet — please pay by bank transfer below."),
   });
 
   const submit = (e: React.FormEvent) => {
@@ -142,33 +154,48 @@ function OrderModal({ order, onClose }: { order: OrderDraft; onClose: () => void
     <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto" onClick={onClose}>
       <div className="bg-[#14141c] border border-white/10 rounded-2xl max-w-md w-full p-6 my-8" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between mb-4">
-          <h3 className="text-xl font-bold">{done ? "Order Placed!" : order.title}</h3>
+          <h3 className="text-xl font-bold">{orderId ? "Order Placed!" : order.title}</h3>
           <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-full">
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {done ? (
+        {orderId ? (
           <div>
             <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 mb-5 text-center">
               <Check className="w-8 h-8 text-green-400 mx-auto mb-2" />
               <p className="text-green-300 font-semibold">Thank you, {name.split(" ")[0]}!</p>
-              <p className="text-white/60 text-sm mt-1">Your order has been received.</p>
+              <p className="text-white/60 text-sm mt-1">Your order #{orderId} has been received.</p>
             </div>
+
+            <button
+              onClick={() => createPayment.mutate({ orderId })}
+              disabled={createPayment.isPending}
+              className="w-full bg-violet-600 hover:bg-violet-500 py-4 rounded-full font-bold transition disabled:opacity-50 flex items-center justify-center gap-2 mb-4"
+            >
+              {createPayment.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+              Pay Now — {fmt(order.total)}
+            </button>
+            <p className="text-center text-xs text-white/40 mb-5">
+              {payMethod === "visa" ? "Opens the secure card payment page." : "Opens your bank app or the Bancontact app."}
+            </p>
+
+            {error && <p className="text-amber-400 text-sm mb-4 text-center">{error}</p>}
+
             <div className="bg-white/5 border border-white/10 rounded-xl p-5 mb-5">
               <p className="flex items-center gap-2 font-bold mb-3">
-                <Landmark className="w-5 h-5 text-violet-400" /> Payment details
+                <Landmark className="w-5 h-5 text-violet-400" /> Or pay by bank transfer
               </p>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between"><span className="text-white/50">Account</span><span className="font-mono font-bold">{BANK_ACCOUNT}</span></div>
                 <div className="flex justify-between"><span className="text-white/50">Amount</span><span className="font-bold">{fmt(order.total)}</span></div>
-                <div className="flex justify-between"><span className="text-white/50">Reference</span><span className="font-semibold">Order + {name}</span></div>
+                <div className="flex justify-between"><span className="text-white/50">Reference</span><span className="font-semibold">Order #{orderId}</span></div>
               </div>
               <p className="text-xs text-white/40 mt-3">
-                Pay via {payMethod === "visa" ? "Visa" : "Bancontact"} bank transfer. Your order goes into production as soon as payment arrives.
+                Your order goes into production as soon as payment arrives.
               </p>
             </div>
-            <button onClick={onClose} className="w-full bg-violet-600 hover:bg-violet-500 py-3.5 rounded-full font-bold transition">
+            <button onClick={onClose} className="w-full bg-white/10 hover:bg-white/20 py-3.5 rounded-full font-bold transition">
               Close
             </button>
           </div>
@@ -262,6 +289,9 @@ function Shop() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [order, setOrder] = useState<OrderDraft | null>(null);
+  const [paidBanner, setPaidBanner] = useState(
+    () => new URLSearchParams(window.location.search).get("payment") === "success"
+  );
 
   /* Configurator state */
   const [cfgController, setCfgController] = useState<Product>(products[0]);
@@ -307,6 +337,22 @@ function Shop() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white font-sans">
+      {paidBanner && (
+        <div className="fixed top-20 inset-x-4 sm:inset-x-auto sm:right-6 z-[90] bg-green-500/15 border border-green-500/40 rounded-2xl p-5 max-w-sm shadow-xl">
+          <div className="flex items-start gap-3">
+            <Check className="w-6 h-6 text-green-400 shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="font-bold text-green-300">Payment successful!</p>
+              <p className="text-sm text-white/60 mt-1">
+                Thank you! Your payment has been received — your order now goes into production.
+              </p>
+            </div>
+            <button onClick={() => setPaidBanner(false)} className="p-1 hover:bg-white/10 rounded-full">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
       {/* Nav */}
       <header className="fixed top-0 inset-x-0 z-50 bg-[#0a0a0f]/80 backdrop-blur-md border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">

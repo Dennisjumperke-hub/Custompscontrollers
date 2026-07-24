@@ -14,7 +14,29 @@ export type NewOrder = {
 };
 
 export async function createOrder(data: NewOrder) {
-  await getDb().insert(orders).values(data);
+  const result = await getDb().insert(orders).values(data).$returningId();
+  return result[0].id;
+}
+
+export async function getOrderById(id: number) {
+  const rows = await getDb().select().from(orders).where(eq(orders.id, id));
+  return rows[0];
+}
+
+export async function setMolliePaymentId(id: number, molliePaymentId: string) {
+  await getDb().update(orders).set({ molliePaymentId }).where(eq(orders.id, id));
+}
+
+export async function getOrderByMollieId(molliePaymentId: string) {
+  const rows = await getDb()
+    .select()
+    .from(orders)
+    .where(eq(orders.molliePaymentId, molliePaymentId));
+  return rows[0];
+}
+
+export async function markOrderPaid(id: number) {
+  await getDb().update(orders).set({ status: "paid" }).where(eq(orders.id, id));
 }
 
 export async function listOrders() {
