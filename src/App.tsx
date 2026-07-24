@@ -57,11 +57,11 @@ const products: Product[] = [
 
 /* Back paddles */
 const paddles: Paddle[] = [
-  { id: "chameleon-purple", name: "Chameleon Purple", price: 59, img: "/images/paddles/chameleon-purple.jpg", color: "from-purple-400 to-blue-500", tag: "Popular" },
-  { id: "chameleon-green", name: "Chameleon Green", price: 59, img: "/images/paddles/chameleon-green.jpg", color: "from-teal-400 to-purple-500" },
-  { id: "chrome-gold", name: "Chrome Gold", price: 64, img: "/images/paddles/chrome-gold.jpg", color: "from-amber-400 to-yellow-600", tag: "Premium" },
-  { id: "arctic-white", name: "Arctic White Grip", price: 54, img: "/images/paddles/arctic-white.jpg", color: "from-slate-200 to-slate-400" },
-  { id: "stealth-black", name: "Stealth Black", price: 54, img: "/images/paddles/stealth-black.jpg", color: "from-zinc-600 to-black" },
+  { id: "chameleon-purple", name: "Chameleon Purple", price: 54.99, img: "/images/paddles/chameleon-purple.jpg", color: "from-purple-400 to-blue-500", tag: "Popular" },
+  { id: "chameleon-green", name: "Chameleon Green", price: 54.99, img: "/images/paddles/chameleon-green.jpg", color: "from-teal-400 to-purple-500" },
+  { id: "chrome-gold", name: "Chrome Gold", price: 54.99, img: "/images/paddles/chrome-gold.jpg", color: "from-amber-400 to-yellow-600", tag: "Premium" },
+  { id: "arctic-white", name: "Arctic White Grip", price: 64.99, img: "/images/paddles/arctic-white.jpg", color: "from-slate-200 to-slate-400" },
+  { id: "stealth-black", name: "Stealth Black", price: 64.99, img: "/images/paddles/stealth-black.jpg", color: "from-zinc-600 to-black" },
 ];
 
 const faqs = [
@@ -458,7 +458,7 @@ function Shop() {
                 <div className="p-5">
                   <h3 className="font-bold mb-3">{p.name}</h3>
                   <div className="flex items-center justify-between">
-                    <span className="text-xl font-extrabold">€{p.price}</span>
+                    <span className="text-xl font-extrabold">{fmt(p.price)}</span>
                     <button
                       onClick={() => orderPaddle(p)}
                       className="bg-violet-600 hover:bg-violet-500 px-4 py-2 rounded-full text-sm font-bold transition"
