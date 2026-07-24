@@ -14,6 +14,12 @@ import { env } from "./lib/env";
 
 const ADMIN_KEY = "Dpm5046656";
 
+function getOrigin(req: Request): string {
+  const host = req.headers.get("x-forwarded-host") ?? new URL(req.url).host;
+  const proto = req.headers.get("x-forwarded-proto") ?? new URL(req.url).protocol.replace(":", "");
+  return `${proto}://${host}`;
+}
+
 export const ordersRouter = createRouter({
   create: publicQuery
     .input(
@@ -44,7 +50,7 @@ export const ordersRouter = createRouter({
       if (!env.stripeSecretKey) throw new Error("Payments not configured yet");
       const order = await getOrderById(input.orderId);
       if (!order) throw new Error("Order not found");
-      const origin = new URL(ctx.req.url).origin;
+      const origin = getOrigin(ctx.req);
       const session = await createCheckoutSession({
         orderId: Number(order.id),
         amountCents: order.total,
