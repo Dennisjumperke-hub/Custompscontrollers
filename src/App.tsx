@@ -48,11 +48,11 @@ type Paddle = {
 /* Controllers (base models for the configurator)
    Single color = €80 · Two or more colors = €100 */
 const products: Product[] = [
-  { id: "classic-white", name: "Classic White", price: 80, img: "/images/controllers/classic-white.jpg", color: "from-slate-300 to-slate-500", desc: "The timeless original DualSense look." },
-  { id: "midnight-black", name: "Midnight Black", price: 80, img: "/images/controllers/midnight-black.jpg", color: "from-zinc-600 to-black", tag: "Best Seller", desc: "Sleek all-black official finish." },
-  { id: "chameleon-blue", name: "Chameleon Blue", price: 100, img: "/images/controllers/chameleon-blue.jpg", color: "from-indigo-500 to-blue-700", desc: "Metallic blue-purple color-shifting shell." },
-  { id: "pearl-white", name: "Pearl White", price: 100, img: "/images/controllers/pearl-white.jpg", color: "from-slate-200 to-purple-200", desc: "Iridescent pearl finish that shifts in the light." },
-  { id: "chameleon-emerald", name: "Chameleon Emerald", price: 100, img: "/images/controllers/chameleon-emerald.jpg", color: "from-emerald-500 to-teal-700", desc: "Metallic green-teal color-shifting shell." },
+  { id: "classic-white", name: "Classic White", price: 79.99, img: "/images/controllers/classic-white.jpg", color: "from-slate-300 to-slate-500", desc: "The timeless original DualSense look." },
+  { id: "midnight-black", name: "Midnight Black", price: 79.99, img: "/images/controllers/midnight-black.jpg", color: "from-zinc-600 to-black", tag: "Best Seller", desc: "Sleek all-black official finish." },
+  { id: "chameleon-blue", name: "Chameleon Blue", price: 99.99, img: "/images/controllers/chameleon-blue.jpg", color: "from-indigo-500 to-blue-700", desc: "Metallic blue-purple color-shifting shell." },
+  { id: "pearl-white", name: "Pearl White", price: 99.99, img: "/images/controllers/pearl-white.jpg", color: "from-slate-200 to-purple-200", desc: "Iridescent pearl finish that shifts in the light." },
+  { id: "chameleon-emerald", name: "Chameleon Emerald", price: 99.99, img: "/images/controllers/chameleon-emerald.jpg", color: "from-emerald-500 to-teal-700", desc: "Metallic green-teal color-shifting shell." },
 ];
 
 /* Back paddles */
@@ -414,7 +414,7 @@ function Shop() {
                   <h3 className="font-bold text-lg mb-1">{p.name}</h3>
                   <p className="text-white/50 text-sm mb-4 min-h-[2.5rem]">{p.desc}</p>
                   <div className="flex items-center justify-between">
-                    <span className="text-2xl font-extrabold">€{p.price}</span>
+                    <span className="text-2xl font-extrabold">{fmt(p.price)}</span>
                     <button
                       onClick={() => orderController(p)}
                       className="bg-violet-600 hover:bg-violet-500 px-5 py-2.5 rounded-full text-sm font-bold transition"
