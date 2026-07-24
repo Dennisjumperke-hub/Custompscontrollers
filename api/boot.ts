@@ -59,6 +59,31 @@ if (env.isProduction) {
   const { serveStaticFiles } = await import("./lib/vite");
   serveStaticFiles(app);
 
+  // Auto-create database tables on startup
+  try {
+    const { getDb } = await import("./queries/connection");
+    const { sql } = await import("drizzle-orm");
+    await getDb().execute(sql`
+      CREATE TABLE IF NOT EXISTS orders (
+        id bigint unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        customer_name varchar(255) NOT NULL,
+        email varchar(255) NOT NULL,
+        address text NOT NULL,
+        payment_method enum('visa','bancontact') NOT NULL,
+        items text NOT NULL,
+        subtotal int NOT NULL,
+        shipping int NOT NULL,
+        total int NOT NULL,
+        status enum('new','paid','shipped','done') NOT NULL DEFAULT 'new',
+        stripe_session_id varchar(128),
+        created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    console.log("Database tables ready");
+  } catch (err) {
+    console.error("Failed to create database tables", err);
+  }
+
   const port = parseInt(process.env.PORT || "3000");
   serve({ fetch: app.fetch, port }, () => {
     console.log(`Server running on http://localhost:${port}/`);
