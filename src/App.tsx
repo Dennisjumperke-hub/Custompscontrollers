@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Routes, Route } from "react-router";
+import { Routes, Route, Link } from "react-router";
 import {
   Gamepad2,
   Zap,
@@ -716,6 +716,9 @@ function Shop() {
           <Mail className="w-4 h-4" /> custom.pscontrollers@hotmail.com
         </p>
         <p>© {new Date().getFullYear()} CustomPSControllers. Not affiliated with Sony Interactive Entertainment.</p>
+        <Link to="/admin" className="inline-block mt-4 text-xs text-white/25 hover:text-white/60 transition">
+          Admin
+        </Link>
       </footer>
 
       {order && <OrderModal order={order} onClose={() => setOrder(null)} />}
