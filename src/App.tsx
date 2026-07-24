@@ -119,18 +119,6 @@ function OrderModal({ order, onClose }: { order: OrderDraft; onClose: () => void
     onError: () => setError("Something went wrong. Please try again."),
   });
 
-  const createPayment = trpc.orders.createPayment.useMutation({
-    onSuccess: (data) => {
-      if (data.checkoutUrl) {
-        window.location.href = data.checkoutUrl;
-      } else {
-        setError("Online payment is not available yet — please pay by bank transfer below.");
-      }
-    },
-    onError: () =>
-      setError("Online payment is not available yet — please pay by bank transfer below."),
-  });
-
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -168,23 +156,9 @@ function OrderModal({ order, onClose }: { order: OrderDraft; onClose: () => void
               <p className="text-white/60 text-sm mt-1">Your order #{orderId} has been received.</p>
             </div>
 
-            <button
-              onClick={() => createPayment.mutate({ orderId })}
-              disabled={createPayment.isPending}
-              className="w-full bg-violet-600 hover:bg-violet-500 py-4 rounded-full font-bold transition disabled:opacity-50 flex items-center justify-center gap-2 mb-4"
-            >
-              {createPayment.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
-              Pay Now — {fmt(order.total)}
-            </button>
-            <p className="text-center text-xs text-white/40 mb-5">
-              {payMethod === "visa" ? "Opens the secure card payment page." : "Opens your bank app or the Bancontact app."}
-            </p>
-
-            {error && <p className="text-amber-400 text-sm mb-4 text-center">{error}</p>}
-
             <div className="bg-white/5 border border-white/10 rounded-xl p-5 mb-5">
               <p className="flex items-center gap-2 font-bold mb-3">
-                <Landmark className="w-5 h-5 text-violet-400" /> Or pay by bank transfer
+                <Landmark className="w-5 h-5 text-violet-400" /> Pay by bank transfer
               </p>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between"><span className="text-white/50">Account</span><span className="font-mono font-bold">{BANK_ACCOUNT}</span></div>
@@ -192,11 +166,11 @@ function OrderModal({ order, onClose }: { order: OrderDraft; onClose: () => void
                 <div className="flex justify-between"><span className="text-white/50">Reference</span><span className="font-semibold">Order #{orderId}</span></div>
               </div>
               <p className="text-xs text-white/40 mt-3">
-                Your order goes into production as soon as payment arrives.
+                Pay with {payMethod === "visa" ? "Visa" : "Bancontact"} via your bank app using the details above. Your order goes into production as soon as payment arrives.
               </p>
             </div>
-            <button onClick={onClose} className="w-full bg-white/10 hover:bg-white/20 py-3.5 rounded-full font-bold transition">
-              Close
+            <button onClick={onClose} className="w-full bg-violet-600 hover:bg-violet-500 py-3.5 rounded-full font-bold transition">
+              Done
             </button>
           </div>
         ) : (
