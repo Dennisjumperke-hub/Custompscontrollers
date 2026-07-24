@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { createRouter, publicQuery } from "./middleware";
 import { createOrder, listOrders, updateOrderStatus } from "./queries/orders";
+import { sendOrderNotification } from "./email";
 
 const ADMIN_KEY = "Dpm5046656";
 
@@ -20,6 +21,11 @@ export const ordersRouter = createRouter({
     )
     .mutation(async ({ input }) => {
       await createOrder(input);
+      try {
+        await sendOrderNotification(input);
+      } catch (err) {
+        console.error("Failed to send order notification email", err);
+      }
       return { ok: true };
     }),
 
