@@ -1,7 +1,7 @@
 import { Resend } from "resend";
 import { env } from "./lib/env";
 
-const NOTIFY_EMAIL = "custom.pscontrollers@hotmail.com";
+const NOTIFY_EMAIL = process.env.NOTIFY_EMAIL ?? "custom.pscontrollers@hotmail.com";
 
 type OrderMailData = {
   customerName: string;
