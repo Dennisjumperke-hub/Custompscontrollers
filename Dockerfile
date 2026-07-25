@@ -3,7 +3,8 @@ FROM node:20-alpine
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN NODE_ENV=development npm ci --include=dev
+RUN npm install -g npm@11
+RUN NODE_ENV=development npm ci --include=dev --no-audit --no-fund
 
 
 COPY . .
