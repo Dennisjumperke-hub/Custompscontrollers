@@ -48,6 +48,49 @@ export async function sendOrderConfirmation(o: OrderMailData & { orderId: number
   });
 }
 
+export async function sendStatusUpdate(opts: {
+  orderId: number;
+  customerName: string;
+  email: string;
+  status: "paid" | "shipped" | "done";
+  total: number;
+}) {
+  if (!env.resendApiKey) return;
+  const resend = new Resend(env.resendApiKey);
+  const subjects = {
+    paid: `Payment received — Order #${opts.orderId}`,
+    shipped: `Your order is on its way! — Order #${opts.orderId}`,
+    done: `Order completed — Order #${opts.orderId}`,
+  };
+  const bodies = {
+    paid: [
+      `Hi ${opts.customerName},`,
+      ``,
+      `Great news — we've received your payment of ${euro(opts.total)} for order #${opts.orderId}.`,
+      `Your controller now goes into production. You'll get another email when it ships.`,
+    ],
+    shipped: [
+      `Hi ${opts.customerName},`,
+      ``,
+      `Your order #${opts.orderId} has been shipped!`,
+      `Keep an eye on your mailbox — it should arrive within a few working days.`,
+    ],
+    done: [
+      `Hi ${opts.customerName},`,
+      ``,
+      `Your order #${opts.orderId} is marked as completed.`,
+      `Enjoy your custom controller! Any questions or issues? Just reply to this email —`,
+      `you have a 2-month warranty.`,
+    ],
+  };
+  await resend.emails.send({
+    from: FROM_EMAIL,
+    to: opts.email,
+    subject: subjects[opts.status],
+    text: [...bodies[opts.status], ``, `— CustomPSControllers`].join("\n"),
+  });
+}
+
 export async function sendPaymentReceived(opts: {
   orderId: number;
   customerName: string;

@@ -8,7 +8,7 @@ import {
   setStripeSessionId,
   updateOrderStatus,
 } from "./queries/orders";
-import { sendOrderConfirmation, sendOrderNotification, sendPaymentReceived } from "./email";
+import { sendOrderConfirmation, sendOrderNotification, sendPaymentReceived, sendStatusUpdate } from "./email";
 import { createCheckoutSession, getCheckoutSession } from "./stripe";
 import { env } from "./lib/env";
 
@@ -108,6 +108,22 @@ export const ordersRouter = createRouter({
     .mutation(async ({ input }) => {
       if (input.key !== ADMIN_KEY) throw new Error("Unauthorized");
       await updateOrderStatus(input.id, input.status);
+      if (input.status !== "new") {
+        const order = await getOrderById(input.id);
+        if (order) {
+          try {
+            await sendStatusUpdate({
+              orderId: Number(order.id),
+              customerName: order.customerName,
+              email: order.email,
+              status: input.status,
+              total: order.total,
+            });
+          } catch (err) {
+            console.error("Failed to send status update email", err);
+          }
+        }
+      }
       return { ok: true };
     }),
 });
