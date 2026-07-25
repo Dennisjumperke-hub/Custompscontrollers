@@ -8,7 +8,7 @@ import {
   setStripeSessionId,
   updateOrderStatus,
 } from "./queries/orders";
-import { sendOrderNotification, sendPaymentReceived } from "./email";
+import { sendOrderConfirmation, sendOrderNotification, sendPaymentReceived } from "./email";
 import { createCheckoutSession, getCheckoutSession } from "./stripe";
 import { env } from "./lib/env";
 
@@ -40,6 +40,11 @@ export const ordersRouter = createRouter({
         await sendOrderNotification(input);
       } catch (err) {
         console.error("Failed to send order notification email", err);
+      }
+      try {
+        await sendOrderConfirmation({ ...input, orderId });
+      } catch (err) {
+        console.error("Failed to send order confirmation email", err);
       }
       return { ok: true, orderId };
     }),
