@@ -53,6 +53,9 @@ const products: Product[] = [
   { id: "chameleon-blue", name: "Chameleon Blue", price: 99.99, img: "/images/controllers/chameleon-blue.jpg", color: "from-indigo-500 to-blue-700", desc: "Metallic blue-purple color-shifting shell." },
   { id: "pearl-white", name: "Pearl White", price: 99.99, img: "/images/controllers/pearl-white.jpg", color: "from-slate-200 to-purple-200", desc: "Iridescent pearl finish that shifts in the light." },
   { id: "chameleon-emerald", name: "Chameleon Emerald", price: 99.99, img: "/images/controllers/chameleon-emerald.jpg", color: "from-emerald-500 to-teal-700", desc: "Metallic green-teal color-shifting shell." },
+  { id: "inferno-red", name: "Inferno Red", price: 99.99, img: "/images/controllers/inferno-red.jpg", color: "from-red-500 to-black", desc: "Fiery red shell with a black fade top." },
+  { id: "venom-green", name: "Venom Green", price: 99.99, img: "/images/controllers/venom-green.jpg", color: "from-lime-400 to-black", desc: "Toxic green shell with a black fade top." },
+  { id: "frost-blue", name: "Frost Blue", price: 99.99, img: "/images/controllers/frost-blue.jpg", color: "from-sky-400 to-black", desc: "Ice-cold blue shell with a black fade top." },
 ];
 
 /* Back paddles */
